@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use DB;
+use App\Post;
 
 use App\Http\Requests;
 
@@ -12,8 +13,8 @@ class PostsJsonController extends Controller
     public function index()
     {
 
-        $posts = DB::table('posts')
-            ->select(['title', 'excerpt', 'slug', 'published_at'])
+        $posts = Post::select(['id', 'title', 'excerpt', 'slug', 'published_at'])
+            ->with('categories')
             ->where('published','=','1')
             ->paginate(2);
 

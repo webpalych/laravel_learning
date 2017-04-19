@@ -25,6 +25,12 @@ Route::get('/post/{slug}',[
     'as' => 'get_post',
 ]);
 
+Route::get('/category/{slug}',[
+    'uses' => 'PostsController@getPostsByCategory',
+    'as' => 'get_posts_by_cat',
+]);
+
+
 
 Route::group(['prefix' => 'json'], function (){
 

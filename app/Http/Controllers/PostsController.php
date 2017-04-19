@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Category;
 use Illuminate\Http\Request;
 use DB;
+use App\Post;
 
 use App\Http\Requests;
 
@@ -11,13 +13,13 @@ class PostsController extends Controller
 {
     public function index()
     {
-
-        $posts = DB::table('posts')
-            ->select(['title', 'excerpt', 'slug', 'published_at'])
+        $posts = Post::select(['id', 'title', 'excerpt', 'slug', 'published_at'])
+            ->with('categories')
             ->where('published','=','1')
             ->paginate(2);
 
         $data = [
+            'title' => 'Все посты',
             'posts' => $posts
         ];
 
@@ -28,19 +30,39 @@ class PostsController extends Controller
     public function getPost($slug)
     {
 
-        //$post = DB::select("SELECT * FROM `posts` WHERE (`published` = ?) AND (`slug` = ?)",['1', $slug]);
-        $post = DB::table('posts')
-            ->select(['title','content'])
+        $post = Post::select(['title','content'])
             ->where('published','=','1')
             ->where('slug','=',$slug)
-            ->get();
+            ->firstOrFail();
 
-        if ($post)
-        {
-            return view('posts.single', ['post' =>$post[0]]);
-        }
+            return view('posts.single', ['post' =>$post]);
 
-        abort(404);
 
     }
+
+    public function getPostsByCategory($slug)
+    {
+        $category = Category::select(['id','title'])
+            ->where('slug', $slug)
+            ->first();
+        $posts = $category->posts()
+            ->with('categories')
+            ->where('published','=','1')
+            ->paginate(6);
+
+
+//        foreach ( $posts as &$post )
+//        {
+//            $categories = $post->categories()->select(['title','slug'])->get();
+//            $post->categories = $categories;
+//        }
+
+        $data = [
+            'title' => $category->title,
+            'posts' => $posts
+        ];
+
+        return view('posts.index', $data);
+    }
+
 }
